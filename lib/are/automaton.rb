@@ -47,27 +47,24 @@ module ARE
       "#<NFA: states={#{self.states.to_a.map(&:inspect).join(', ')}}, transitions={#{self.transitions.to_a.map(&:inspect).join(', ')}}, start=#{self.start.inspect}, acceptings={#{self.acceptings.to_a.map(&:inspect).join('. ')}}>"
     end
 
-    def nfa?
-      type == :nfa
-    end
-
-    def dfa?
-      type == :dfa
-    end
-
-    def type
-      # Epsilon transition means NFA
-      return :nfa if transitions.any? {|transition| transition.symbol == nil }
-
+    def deterministic?
       counter = transitions.each_with_object(Hash.new{|key| 0 }) do |transition, counter|
         key = [transition.src, transition.symbol]
         counter[key] += 1
       end
 
-      if counter.values.any? {|count| count > 1 }
-        :nfa
-      else
-        :dfa
+      counter.values.all? {|count| count == 1 }
+    end
+
+    def with_epsilon?
+      transitions.any? {|transition| transition.symbol == nil }
+    end
+
+    def drives(from, symbol)
+      transitions.each_with_object(Set.new) do |transition, set|
+        if transition.src == from and transition.symbol == symbol
+          set << transition.dest
+        end
       end
     end
 
@@ -75,6 +72,39 @@ module ARE
       nfa = NFA.new()
 
       
+    end
+
+    def self.dfa_from_nfa(nfa)
+      dfa = FSA.new
+      dfa.start = Set.new([nfa.start])
+      dfa.states << dfa.start
+
+      queue = [dfa.start]
+      until queue.empty?
+        from = queue.shift
+        destinations = Hash.new {|hash, key| hash[key] = Set.new }
+
+        nfa.transitions.select {|transition| from.include? transition.src }.each {|transition|
+          destinations[transition.symbol] << transition.dest
+        }
+
+        destinations.each do |symbol, destination|
+          dfa.transitions << Transition.new(symbol, from, destination)
+
+          unless dfa.states.include?(destination)
+            dfa.states << destination
+            queue << destination
+          end
+        end
+      end
+
+      dfa.states.each do |state|
+        if state.intersection(nfa.acceptings).size > 0
+          dfa.acceptings << state
+        end
+      end
+
+      dfa
     end
 	end
 end

@@ -1,4 +1,4 @@
-require "are/nfa"
+require "are/automaton"
 
 module ARE
   class Regexp
@@ -72,39 +72,39 @@ end
 def ARE(*args)
   ARE.concat(args.map {|a| ARE.lit(a) })
 end
-
-re = ARE(1,2) + (ARE.empty | ARE(1)) + ARE.oneof(1,2,3) + ARE.except(2,3,4)
-
-re =~ [1,2,3,1]
-
-p ARE(1) =~ [1]
-p ARE(1,2) =~ [1,2]
-p ARE.oneof(1,2,3) =~ [3]
-p ARE(1) + (ARE(2) | ARE(3)) + ARE(4) =~ [1,3,4]
-
-transition = ARE::Transition.new(:a, :state2, :state3)
-
-p transition
-
-nfa = ARE::FSA.new
-
-nfa.states.add(:state1)
-nfa.states.add(:state2)
-nfa.states.add(:state3)
-
-nfa.start = :state1
-
-nfa.acceptings.add(:state3)
-
-nfa.transitions.add(ARE::Transition.new(1, :state1, :state2))
-nfa.transitions.add(ARE::Transition.new(2, :state2, :state2))
-nfa.transitions.add(ARE::Transition.new(nil, :state2, :state3))
-
-p nfa.type
-
-p nfa
-
-f = ARE::StateFactory.new
-p f.next
-p f.next
-
+#
+#re = ARE(1,2) + (ARE.empty | ARE(1)) + ARE.oneof(1,2,3) + ARE.except(2,3,4)
+#
+#re =~ [1,2,3,1]
+#
+#p ARE(1) =~ [1]
+#p ARE(1,2) =~ [1,2]
+#p ARE.oneof(1,2,3) =~ [3]
+#p ARE(1) + (ARE(2) | ARE(3)) + ARE(4) =~ [1,3,4]
+#
+#transition = ARE::Transition.new(:a, :state2, :state3)
+#
+#p transition
+#
+#nfa = ARE::FSA.new
+#
+#nfa.states.add(:state1)
+#nfa.states.add(:state2)
+#nfa.states.add(:state3)
+#
+#nfa.start = :state1
+#
+#nfa.acceptings.add(:state3)
+#
+#nfa.transitions.add(ARE::Transition.new(1, :state1, :state2))
+#nfa.transitions.add(ARE::Transition.new(2, :state2, :state2))
+#nfa.transitions.add(ARE::Transition.new(nil, :state2, :state3))
+#
+#p nfa.type
+#
+#p nfa
+#
+#f = ARE::StateFactory.new
+#p f.next
+#p f.next
+#
